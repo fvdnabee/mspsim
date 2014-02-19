@@ -54,12 +54,14 @@ JAVAARGS=-classpath "${CLASSPATH}"
 ###############################################################
 # SERVER OBJECTS
 ###############################################################
+FIRMWAREFILE=/home/fvdabeele/GIT/contiki/examples/hello-world/hello-world.rm090
 
 ifndef FIRMWAREFILE
 ESBFIRMWARE = firmware/esb/sensor-demo.esb
 SKYFIRMWARE = firmware/sky/blink.sky
 Z1FIRMWARE = firmware/z1/blink.z1
 WISMOTEFIRMWARE = firmware/wismote/blink.wismote
+RM090FIRMWARE = firmware/rm090/hello-world.rm090
 TYNDALLFIRMWARE = firmware/tyndall/blink.tyndall
 EXP5438FIRMWARE = firmware/exp5438/testcase-bits.exp5438
 else
@@ -67,6 +69,7 @@ ESBFIRMWARE = ${FIRMWAREFILE}
 SKYFIRMWARE = ${FIRMWAREFILE}
 Z1FIRMWARE = ${FIRMWAREFILE}
 WISMOTEFIRMWARE = ${FIRMWAREFILE}
+RM090FIRMWARE = ${FIRMWAREFILE}
 TYNDALLFIRMWARE = ${FIRMWAREFILE}
 EXP5438FIRMWARE = ${FIRMWAREFILE}
 endif
@@ -81,7 +84,7 @@ TIMERTEST := tests/timertest.firmware
 SCRIPTS := ${addprefix scripts/,autorun.sc duty.sc}
 BINARY := README.txt license.txt CHANGE_LOG.txt images/*.jpg images/*.png firmware/*/*.firmware ${SCRIPTS}
 
-PACKAGES := se/sics/mspsim ${addprefix se/sics/mspsim/,core chip cli config debug platform ${addprefix platform/,esb sky jcreate sentillausb z1 tyndall ti wismote} plugin profiler emulink net ui util extutil/highlight extutil/jfreechart}
+PACKAGES := se/sics/mspsim ${addprefix se/sics/mspsim/,core chip cli config debug platform ${addprefix platform/,esb sky jcreate sentillausb z1 tyndall ti wismote rm090} plugin profiler emulink net ui util extutil/highlight extutil/jfreechart}
 
 SOURCES := ${wildcard *.java $(addsuffix /*.java,$(PACKAGES))}
 
@@ -128,6 +131,9 @@ $(JARFILE):	$(OBJECTS)
 %.wismote:	jar
 	java -jar $(JARFILE) -platform=wismote $@ $(ARGS)
 
+%.rm090:	jar
+	java -jar $(JARFILE) -platform=rm090 $(ARGS) $@
+
 help:
 	@echo "Usage: make [all,compile,clean,run,runsky,runesb]"
 
@@ -151,7 +157,8 @@ runtyndall:	compile
 	$(JAVA) $(JAVAARGS) se.sics.mspsim.platform.tyndall.TyndallNode $(TYNDALLFIRMWARE) $(MAPARGS) $(ARGS)
 runwismote:	compile
 	$(JAVA) $(JAVAARGS) se.sics.mspsim.platform.wismote.WismoteNode $(WISMOTEFIRMWARE) $(MAPARGS) $(ARGS)
-
+runrm090:	compile
+	$(JAVA) $(JAVAARGS) se.sics.mspsim.platform.rm090.RM090Node $(RM090FIRMWARE) $(MAPFILE) $(ARGS)
 runexp5438:	compile
 	$(JAVA) $(JAVAARGS) se.sics.mspsim.platform.ti.Exp5438Node $(EXP5438FIRMWARE) $(MAPARGS) $(ARGS)
 
