@@ -54,7 +54,6 @@ JAVAARGS=-classpath "${CLASSPATH}"
 ###############################################################
 # SERVER OBJECTS
 ###############################################################
-FIRMWAREFILE=/home/fvdabeele/GIT/contiki/examples/hello-world/hello-world.rm090
 
 ifndef FIRMWAREFILE
 ESBFIRMWARE = firmware/esb/sensor-demo.esb

@@ -176,7 +176,7 @@ public class RM090Node extends GenericNode implements PortListener, USARTListene
         button = new Button("Button", cpu, port2, BUTTON_PIN, true);
 
         /* RM090: TODO: serial port for RM090, will it work? */
-        IOUnit usart = cpu.getIOUnit("USCI A0");
+        IOUnit usart = cpu.getIOUnit("USCI A1");
         if (usart instanceof USARTSource) {
             registry.registerComponent("serialio", usart);
         } else {
