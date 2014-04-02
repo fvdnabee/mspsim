@@ -648,6 +648,7 @@ public class CC2520 extends Radio802154 implements USARTListener, SPIData {
         case TX_ACK_CALIBRATE:
             /* TX active during ACK + NOTE: we ignore the SFD when receiving full packets so
              * we need to add another extra 2 symbols here to get a correct timing */
+            status &= ~STATUS_RX_ACTIVE;
             status |= STATUS_TX_ACTIVE;
             memory[REG_FSMSTAT1] |= (1 << 1);
             setSymbolEvent(12 + 2 + 2);
@@ -1007,6 +1008,7 @@ public class CC2520 extends Radio802154 implements USARTListener, SPIData {
 
     void rxon() {
         if(stateMachine == RadioState.IDLE) {
+	    status |= STATUS_RX_ACTIVE;
             setState(RadioState.RX_CALIBRATE);
             //updateActiveFrequency();
             if (DEBUG) {
@@ -1037,6 +1039,7 @@ public class CC2520 extends Radio802154 implements USARTListener, SPIData {
                 (stateMachine == RadioState.RX_FRAME) ||
                 (stateMachine == RadioState.RX_OVERFLOW) ||
                 (stateMachine == RadioState.RX_WAIT)) {
+            status &= ~STATUS_RX_ACTIVE;
             status |= STATUS_TX_ACTIVE;
             memory[REG_FSMSTAT1] |= (1 << 1);
             setState(RadioState.TX_CALIBRATE);
@@ -1062,6 +1065,7 @@ public class CC2520 extends Radio802154 implements USARTListener, SPIData {
             }
 
             if(currentCCA) {
+	        status &= ~STATUS_RX_ACTIVE;
                 status |= STATUS_TX_ACTIVE;
                 memory[REG_FSMSTAT1] |= (1 << 1);
                 setState(RadioState.TX_CALIBRATE);
@@ -1132,6 +1136,7 @@ public class CC2520 extends Radio802154 implements USARTListener, SPIData {
             cpu.scheduleTimeEventMillis(sendEvent, SYMBOL_PERIOD * 2);
         } else {
             if (DEBUG) log("Completed Transmission.");
+	    status |= STATUS_RX_ACTIVE;
             status &= ~STATUS_TX_ACTIVE;
             memory[REG_FSMSTAT1] &= ~(1 << 1);
             setSFD(false);
@@ -1175,6 +1180,7 @@ public class CC2520 extends Radio802154 implements USARTListener, SPIData {
             cpu.scheduleTimeEventMillis(ackEvent, SYMBOL_PERIOD * 2);
         } else {
             if (DEBUG) log("Completed Transmission of ACK.");
+	    status |= STATUS_RX_ACTIVE;
             status &= ~STATUS_TX_ACTIVE;
             memory[REG_FSMSTAT1] &= ~(1 << 1);
             setSFD(false);
@@ -1486,6 +1492,7 @@ public class CC2520 extends Radio802154 implements USARTListener, SPIData {
         super.notifyReset();
         setChipSelect(false);
         status &= ~STATUS_TX_ACTIVE;
+        status &= ~STATUS_RX_ACTIVE;
         memory[REG_FSMSTAT1] &= ~(1 << 1);
         setVRegOn(false);
         reset();
