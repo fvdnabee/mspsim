@@ -61,6 +61,8 @@ public class RM090Node extends GenericNode implements PortListener, USARTListene
     public static final int CC2520_CCA = 7;
     /* P2.0 - Input: SFD from CC2520 */
     public static final int CC2520_SFD = 0;
+    /* P2.1 - Input: GPIO5 from CC2520 */
+    public static final int CC2520_TX_ACTIVE = 1;
     /* P3.0 - Output: SPI Chip Select (CS_N) */
     public static final int CC2520_CHIP_SELECT = 0x01;
     /* P4.3 - Output: VREG_EN to CC2520 */
@@ -167,6 +169,7 @@ public class RM090Node extends GenericNode implements PortListener, USARTListene
             radio.setGPIO(3, port1, CC2520_CCA);
             radio.setGPIO(2, port1, CC2520_FIFOP);
             radio.setGPIO(4, port2, CC2520_SFD);
+	    radio.setGPIO(5, port2, CC2520_TX_ACTIVE);
 
             ((USARTSource) usart0).addUSARTListener(this);
         } else {

@@ -42,7 +42,7 @@ import se.sics.mspsim.util.CCITT_CRC;
 import se.sics.mspsim.util.Utils;
 
 public class CC2520 extends Radio802154 implements USARTListener, SPIData {
-
+	private static final boolean DEBUG = true;
     public static class GPIO {
         private IOPort port;
         private int pin;
@@ -398,6 +398,7 @@ public class CC2520 extends Radio802154 implements USARTListener, SPIData {
     private GPIO fifopGPIO;
     private GPIO fifoGPIO;
     private GPIO sfdGPIO;
+    private GPIO txactiveGPIO;
     private boolean currentFIFO;
     private boolean currentFIFOP;
 
@@ -555,6 +556,7 @@ public class CC2520 extends Radio802154 implements USARTListener, SPIData {
         fifopGPIO = gpio[2];
         ccaGPIO = gpio[3];
         sfdGPIO = gpio[4];
+	txactiveGPIO = gpio[5];
 
         setFIFO(false);
         setFIFOP(false);
@@ -650,6 +652,8 @@ public class CC2520 extends Radio802154 implements USARTListener, SPIData {
              * we need to add another extra 2 symbols here to get a correct timing */
             status &= ~STATUS_RX_ACTIVE;
             status |= STATUS_TX_ACTIVE;
+            setTXACTIVE(true);
+
             memory[REG_FSMSTAT1] |= (1 << 1);
             setSymbolEvent(12 + 2 + 2);
             setMode(MODE_TXRX_ON);
@@ -1041,6 +1045,7 @@ public class CC2520 extends Radio802154 implements USARTListener, SPIData {
                 (stateMachine == RadioState.RX_WAIT)) {
             status &= ~STATUS_RX_ACTIVE;
             status |= STATUS_TX_ACTIVE;
+            setTXACTIVE(true);
             memory[REG_FSMSTAT1] |= (1 << 1);
             setState(RadioState.TX_CALIBRATE);
             if (sendEvents) {
@@ -1067,6 +1072,7 @@ public class CC2520 extends Radio802154 implements USARTListener, SPIData {
             if(currentCCA) {
 	        status &= ~STATUS_RX_ACTIVE;
                 status |= STATUS_TX_ACTIVE;
+            setTXACTIVE(true);
                 memory[REG_FSMSTAT1] |= (1 << 1);
                 setState(RadioState.TX_CALIBRATE);
                 if (DEBUG) log("Strobe STXONCCA - transmit on! at " + cpu.cycles);
@@ -1138,6 +1144,7 @@ public class CC2520 extends Radio802154 implements USARTListener, SPIData {
             if (DEBUG) log("Completed Transmission.");
 	    status |= STATUS_RX_ACTIVE;
             status &= ~STATUS_TX_ACTIVE;
+            setTXACTIVE(false);
             memory[REG_FSMSTAT1] &= ~(1 << 1);
             setSFD(false);
             if (overflow) {
@@ -1182,6 +1189,7 @@ public class CC2520 extends Radio802154 implements USARTListener, SPIData {
             if (DEBUG) log("Completed Transmission of ACK.");
 	    status |= STATUS_RX_ACTIVE;
             status &= ~STATUS_TX_ACTIVE;
+	    setTXACTIVE(false);
             memory[REG_FSMSTAT1] &= ~(1 << 1);
             setSFD(false);
             setState(RadioState.RX_CALIBRATE);
@@ -1270,6 +1278,17 @@ public class CC2520 extends Radio802154 implements USARTListener, SPIData {
              }
              if (DEBUG) log("Setting CCA to: " + currentCCA);
          }
+    }
+
+    private void setTXACTIVE(boolean tx_active) {
+        txactiveGPIO.setActive(tx_active);
+	// TODO: is this needed?
+        /*if (sfd) {
+            memory[REG_FSMSTAT1] |= 1 << 5;
+        } else {
+            memory[REG_FSMSTAT1] &= ~(1 << 5);
+        }*/
+        if (DEBUG) log("Settings TX active to: " + tx_active + "  " + cpu.cycles);
     }
 
     private void setSFD(boolean sfd) {
@@ -1492,6 +1511,7 @@ public class CC2520 extends Radio802154 implements USARTListener, SPIData {
         super.notifyReset();
         setChipSelect(false);
         status &= ~STATUS_TX_ACTIVE;
+	setTXACTIVE(false);
         status &= ~STATUS_RX_ACTIVE;
         memory[REG_FSMSTAT1] &= ~(1 << 1);
         setVRegOn(false);
