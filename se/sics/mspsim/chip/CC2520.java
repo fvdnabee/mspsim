@@ -42,7 +42,7 @@ import se.sics.mspsim.util.CCITT_CRC;
 import se.sics.mspsim.util.Utils;
 
 public class CC2520 extends Radio802154 implements USARTListener, SPIData {
-	private static final boolean DEBUG = true;
+	private static final boolean DEBUG = false;
     public static class GPIO {
         private IOPort port;
         private int pin;
