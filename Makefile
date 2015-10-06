@@ -157,7 +157,7 @@ runtyndall:	compile
 runwismote:	compile
 	$(JAVA) $(JAVAARGS) se.sics.mspsim.platform.wismote.WismoteNode $(WISMOTEFIRMWARE) $(MAPARGS) $(ARGS)
 runrm090:	compile
-	$(JAVA) $(JAVAARGS) se.sics.mspsim.platform.rm090.RM090Node $(RM090FIRMWARE) $(MAPFILE) $(ARGS)
+	$(JAVA) $(JAVAARGS) se.sics.mspsim.platform.rm090.RM090Node $(RM090FIRMWARE) $(MAPARGS) $(ARGS)
 runexp5438:	compile
 	$(JAVA) $(JAVAARGS) se.sics.mspsim.platform.ti.Exp5438Node $(EXP5438FIRMWARE) $(MAPARGS) $(ARGS)
 
