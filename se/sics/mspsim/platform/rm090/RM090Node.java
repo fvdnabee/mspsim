@@ -63,10 +63,10 @@ public class RM090Node extends GenericNode implements PortListener, USARTListene
     public static final int CC2520_SFD = 0;
     /* P2.1 - Input: GPIO5 from CC2520 */
     public static final int CC2520_TX_ACTIVE = 1;
+    /* P2.5 - Output: VREG_EN to CC2520 */
+    public static final int CC2520_VREG = 1 << 5;
     /* P3.0 - Output: SPI Chip Select (CS_N) */
     public static final int CC2520_CHIP_SELECT = 0x01;
-    /* P4.3 - Output: VREG_EN to CC2520 */
-    public static final int CC2520_VREG = 1 << 3;
     /* P4.4 - Output: RESET_N to CC2520 */
     public static final int CC2520_RESET = 1 << 4;
 
@@ -127,14 +127,14 @@ public class RM090Node extends GenericNode implements PortListener, USARTListene
 
     public void portWrite(IOPort source, int data) {
         switch (source.getPort()) {
-            case 3: /* RM090 vs wismode: CC2520 pins layout identical */
-                // Chip select = active low...
-                radio.setChipSelect((data & CC2520_CHIP_SELECT) == 0);
-                break;
-            case 4: /* RM090 vs wismode: CC2520 pins layout identical */
+            case 2: /* RM090 vs wismode: VREG is on different pin (P2.5) */
                 //radio.portWrite(source, data);
                 //flash.portWrite(source, data);
                 radio.setVRegOn((data & CC2520_VREG) != 0);
+                break;
+            case 3: /* RM090 vs wismode: CC2520 pins layout identical */
+                // Chip select = active low...
+                radio.setChipSelect((data & CC2520_CHIP_SELECT) == 0);
                 break;
             case 8: /* RM090 vs wismode: all LEDs are on port 8 */
                 System.out.println("LEDS RED = " + ((data & LEDS_CONF_RED) > 0));
@@ -157,7 +157,6 @@ public class RM090Node extends GenericNode implements PortListener, USARTListene
         IOPort port2 = cpu.getIOUnit(IOPort.class, "P2");
         port2.addPortListener(this);
         cpu.getIOUnit(IOPort.class, "P3").addPortListener(this);
-        cpu.getIOUnit(IOPort.class, "P4").addPortListener(this);
         //cpu.getIOUnit(IOPort.class, "P5").addPortListener(this); // RM090: not necessary for RM090
         cpu.getIOUnit(IOPort.class, "P8").addPortListener(this);
 
